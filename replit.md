@@ -42,6 +42,14 @@ A cutting-edge digital permit management system designed to streamline safety wo
 - Notification system for approvals and updates
 
 ## Recent Changes
+- **2025-07-17**: Docker-Kompatibilität für Map-Widget-System vollständig validiert ✅
+  - Umfassende Kompatibilitätsprüfung für Docker-Deployment durchgeführt
+  - Build-Prozess, Datenbankschema, Map-Widget-Features und Netzwerkkonfiguration getestet
+  - Alle kritischen Komponenten funktionieren korrekt in containerisierter Umgebung
+  - Docker-Validierungsbericht erstellt: DOCKER_VALIDATION_REPORT.md
+  - Webhook-Test korrigiert: verwendet nun POST-Anfragen für korrekte AI-Integration
+  - Koordinatentransformation zwischen Dashboard und Edit-Modal harmonisiert
+  - Typ-Filter in Dashboard-Ansichten synchronisiert mit Genehmigungsformular
 - **2025-01-17**: Einheitliches Filter-System für Karten- und Listenansicht implementiert ✅
   - Dashboard-Header-Filter entfernt (Suche, Von Datum, Bis Datum)
   - Gleiche 5-Spalten-Filter-Layout für beide Ansichten: Suche, Status, Typ, Von Datum, Bis Datum
