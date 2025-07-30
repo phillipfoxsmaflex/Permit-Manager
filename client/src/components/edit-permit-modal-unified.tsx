@@ -394,9 +394,7 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
         complianceNotes: currentPermit.complianceNotes || "",
         overallRisk: currentPermit.overallRisk || "",
         measuresImplementedSignature: currentPermit.measuresImplementedSignature || "",
-        measuresImplementedAt: formatDate(currentPermit.measuresImplementedAt),
         measuresRemovedSignature: currentPermit.measuresRemovedSignature || "",
-        measuresRemovedAt: formatDate(currentPermit.measuresRemovedAt),
       };
 
       console.log("Form data being set:", {
@@ -469,37 +467,18 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
     console.log("Hazard notes:", hazardNotes);
     console.log("Permit map position:", permitMapPosition);
     
-    // Get current values from form using watch() to ensure we have the latest data
-    const currentMeasuresImplementedSignature = form.watch("measuresImplementedSignature");
-    const currentMeasuresImplementedAt = form.watch("measuresImplementedAt");
-    const currentMeasuresRemovedSignature = form.watch("measuresRemovedSignature");
-    const currentMeasuresRemovedAt = form.watch("measuresRemovedAt");
-    
-    console.log("Current signature values from form:", {
-      measuresImplementedSignature: currentMeasuresImplementedSignature ? 'present' : 'not present',
-      measuresImplementedAt: currentMeasuresImplementedAt ? 'present' : 'not present',
-      measuresRemovedSignature: currentMeasuresRemovedSignature ? 'present' : 'not present',
-      measuresRemovedAt: currentMeasuresRemovedAt ? 'present' : 'not present',
-    });
-    
-    // Add map position and ensure all execution signature fields are included
+    // Add map position - signature fields are already in data like performerSignature
     const submitData = {
       ...data,
       mapPosition: permitMapPosition ? JSON.stringify(permitMapPosition) : null,
       selectedHazards,
       hazardNotes: JSON.stringify(hazardNotes),
-      // Use current form values instead of data parameter
-      measuresImplementedSignature: currentMeasuresImplementedSignature || null,
-      measuresImplementedAt: currentMeasuresImplementedAt || null,
-      measuresRemovedSignature: currentMeasuresRemovedSignature || null,
-      measuresRemovedAt: currentMeasuresRemovedAt || null,
     };
     
-    console.log("Final submit data with signatures:", {
+    console.log("Submit signatures check:", {
       measuresImplementedSignature: submitData.measuresImplementedSignature ? 'present' : 'not present',
-      measuresImplementedAt: submitData.measuresImplementedAt ? 'present' : 'not present',
       measuresRemovedSignature: submitData.measuresRemovedSignature ? 'present' : 'not present',
-      measuresRemovedAt: submitData.measuresRemovedAt ? 'present' : 'not present',
+      performerSignature: submitData.performerSignature ? 'present' : 'not present',
     });
     
     submitMutation.mutate(submitData);
@@ -1240,20 +1219,10 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                 </CardHeader>
                                 <CardContent>
                                   <SignaturePad
-                                    onSignatureChange={(signature) => {
-                                      form.setValue("measuresImplementedSignature", signature);
-                                      if (signature) {
-                                        form.setValue("measuresImplementedAt", new Date().toISOString());
-                                      }
-                                    }}
+                                    onSignatureChange={(signature) => form.setValue("measuresImplementedSignature", signature)}
                                     existingSignature={form.watch("measuresImplementedSignature")}
                                     disabled={!canEditExecution}
                                   />
-                                  {form.watch("measuresImplementedAt") && (
-                                    <p className="text-xs text-gray-500 mt-2">
-                                      Unterschrieben: {new Date(form.watch("measuresImplementedAt") || '').toLocaleString('de-DE')}
-                                    </p>
-                                  )}
                                 </CardContent>
                               </Card>
 
@@ -1267,20 +1236,10 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                 </CardHeader>
                                 <CardContent>
                                   <SignaturePad
-                                    onSignatureChange={(signature) => {
-                                      form.setValue("measuresRemovedSignature", signature);
-                                      if (signature) {
-                                        form.setValue("measuresRemovedAt", new Date().toISOString());
-                                      }
-                                    }}
+                                    onSignatureChange={(signature) => form.setValue("measuresRemovedSignature", signature)}
                                     existingSignature={form.watch("measuresRemovedSignature")}
                                     disabled={!canEditExecution}
                                   />
-                                  {form.watch("measuresRemovedAt") && (
-                                    <p className="text-xs text-gray-500 mt-2">
-                                      Unterschrieben: {new Date(form.watch("measuresRemovedAt") || '').toLocaleString('de-DE')}
-                                    </p>
-                                  )}
                                 </CardContent>
                               </Card>
                             </div>

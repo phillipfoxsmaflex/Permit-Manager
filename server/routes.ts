@@ -552,8 +552,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Updating permit:", id, "with data:", updates);
       
-      // Validate and clean up date fields - including new execution timestamp fields
-      const dateFields = ['startDate', 'endDate', 'workStartedAt', 'workCompletedAt', 'measuresImplementedAt', 'measuresRemovedAt'];
+      // Validate and clean up date fields
+      const dateFields = ['startDate', 'endDate', 'workStartedAt', 'workCompletedAt'];
       for (const field of dateFields) {
         if (updates[field] !== undefined) {
           if (updates[field] === '' || updates[field] === null) {
@@ -573,9 +573,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Signature fields in update request:", {
         measuresImplementedSignature: updates.measuresImplementedSignature ? 'present' : 'not present',
-        measuresImplementedAt: updates.measuresImplementedAt ? 'present' : 'not present',
         measuresRemovedSignature: updates.measuresRemovedSignature ? 'present' : 'not present',
-        measuresRemovedAt: updates.measuresRemovedAt ? 'present' : 'not present',
+        performerSignature: updates.performerSignature ? 'present' : 'not present',
       });
       
       // Handle map position data in updates

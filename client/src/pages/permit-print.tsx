@@ -386,9 +386,6 @@ export default function PermitPrint() {
                       alt="Unterschrift Maßnahmen umgesetzt" 
                       className="max-h-16 w-auto"
                     />
-                    <div className="text-xs text-gray-600 mt-1">
-                      {permit.measuresImplementedAt ? formatDateTime(permit.measuresImplementedAt) : ''}
-                    </div>
                   </div>
                 ) : (
                   <div className="mt-1 border p-2 bg-gray-100 h-20 flex items-center justify-center text-gray-500 text-xs">
@@ -406,9 +403,6 @@ export default function PermitPrint() {
                       alt="Unterschrift Maßnahmen zurückgenommen" 
                       className="max-h-16 w-auto"
                     />
-                    <div className="text-xs text-gray-600 mt-1">
-                      {permit.measuresRemovedAt ? formatDateTime(permit.measuresRemovedAt) : ''}
-                    </div>
                   </div>
                 ) : (
                   <div className="mt-1 border p-2 bg-gray-100 h-20 flex items-center justify-center text-gray-500 text-xs">
