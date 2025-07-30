@@ -571,12 +571,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log("Signature fields in update request:", {
-        measuresImplementedSignature: updates.measuresImplementedSignature ? 'present' : 'not present',
-        measuresRemovedSignature: updates.measuresRemovedSignature ? 'present' : 'not present',
-        performerSignature: updates.performerSignature ? 'present' : 'not present',
-      });
-      
       // Handle map position data in updates
       if (updates.mapPosition) {
         try {

@@ -90,10 +90,6 @@ const permitSchema = z.object({
   overallRisk: z.string().optional(),
   positionX: z.number().optional(),
   positionY: z.number().optional(),
-  measuresImplementedSignature: z.string().optional(),
-  measuresImplementedAt: z.string().optional(),
-  measuresRemovedSignature: z.string().optional(),
-  measuresRemovedAt: z.string().optional(),
 });
 
 type PermitFormData = z.infer<typeof permitSchema>;
@@ -108,11 +104,6 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
   const [selectedHazards, setSelectedHazards] = useState<string[]>([]);
   const [selectedMapBackground, setSelectedMapBackground] = useState<MapBackground | null>(null);
   const [permitMapPosition, setPermitMapPosition] = useState<{ x: number, y: number } | null>(null);
-  
-  // Explicit signature state management to ensure data is preserved
-  const [measuresImplementedSig, setMeasuresImplementedSig] = useState<string>("");
-  const [measuresRemovedSig, setMeasuresRemovedSig] = useState<string>("");
-  const [performerSig, setPerformerSig] = useState<string>("");
 
 
   // Dropdown data queries
@@ -179,10 +170,6 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
       overallRisk: "",
       positionX: mapClickPosition?.x,
       positionY: mapClickPosition?.y,
-      measuresImplementedSignature: "",
-      measuresImplementedAt: "",
-      measuresRemovedSignature: "",
-      measuresRemovedAt: "",
     },
   });
 
@@ -398,8 +385,6 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
         beforeWorkStarts: currentPermit.beforeWorkStarts || "",
         complianceNotes: currentPermit.complianceNotes || "",
         overallRisk: currentPermit.overallRisk || "",
-        measuresImplementedSignature: currentPermit.measuresImplementedSignature || "",
-        measuresRemovedSignature: currentPermit.measuresRemovedSignature || "",
       };
 
       console.log("Form data being set:", {
@@ -463,13 +448,6 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
         // Reset hazardNotes if empty
         setHazardNotes({});
       }
-      
-      // Initialize signature states from permit data
-      if (currentPermit) {
-        setMeasuresImplementedSig(currentPermit.measuresImplementedSignature || "");
-        setMeasuresRemovedSig(currentPermit.measuresRemovedSignature || "");
-        setPerformerSig(currentPermit.performerSignature || "");
-      }
     }
   }, [currentPermit, mode]); // Vereinfachte Dependency - watch das gesamte currentPermit Objekt
 
@@ -479,29 +457,11 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
     console.log("Hazard notes:", hazardNotes);
     console.log("Permit map position:", permitMapPosition);
     
-    console.log("Explicit signature states:", {
-      measuresImplementedSig: measuresImplementedSig ? 'present' : 'not present',  
-      measuresRemovedSig: measuresRemovedSig ? 'present' : 'not present',
-      performerSig: performerSig ? 'present' : 'not present',
-    });
-    
-    // Use explicit signature states instead of form values
+    // Add map position to the data
     const submitData = {
       ...data,
       mapPosition: permitMapPosition ? JSON.stringify(permitMapPosition) : null,
-      selectedHazards,
-      hazardNotes: JSON.stringify(hazardNotes),
-      // Use explicit signature states
-      measuresImplementedSignature: measuresImplementedSig || null,
-      measuresRemovedSignature: measuresRemovedSig || null,
-      performerSignature: performerSig || null,
     };
-    
-    console.log("Final submit data signatures from explicit states:", {
-      measuresImplementedSignature: submitData.measuresImplementedSignature ? 'present' : 'not present',
-      measuresRemovedSignature: submitData.measuresRemovedSignature ? 'present' : 'not present',
-      performerSignature: submitData.performerSignature ? 'present' : 'not present',
-    });
     
     submitMutation.mutate(submitData);
   };
@@ -1218,86 +1178,17 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                             />
                           </div>
 
-                          {/* Execution Signature Fields */}
-                          <div className="space-y-6">
-                            <Alert>
-                              <Info className="h-4 w-4" />
-                              <AlertDescription>
-                                <strong>Unterschriften für die Arbeitsdurchführung:</strong><br />
-                                1. <strong>Maßnahmen vor Arbeitsbeginn umgesetzt:</strong> Bestätigung, dass alle Sicherheitsmaßnahmen und Vorkehrungen getroffen wurden<br />
-                                2. <strong>Maßnahmen zurückgenommen:</strong> Bestätigung, dass alle temporären Schutzmaßnahmen ordnungsgemäß entfernt wurden<br />
-                                3. <strong>Unterschrift Ausführende/r:</strong> Hauptverantwortliche/r für die Arbeiten
-                              </AlertDescription>
-                            </Alert>
-
-                            <div className="space-y-6">
-                              {/* Measures Implemented Signature */}
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle className="text-sm">1. Maßnahmen vor Arbeitsbeginn umgesetzt</CardTitle>
-                                  <p className="text-xs text-gray-600">
-                                    Bestätigung, dass alle Sicherheitsmaßnahmen, Sperrungen und Vorkehrungen ordnungsgemäß durchgeführt wurden
-                                  </p>
-                                </CardHeader>
-                                <CardContent>
-                                  <SignaturePad
-                                    onSignatureChange={(signature) => {
-                                      setMeasuresImplementedSig(signature);
-                                      form.setValue("measuresImplementedSignature", signature);
-                                    }}
-                                    existingSignature={measuresImplementedSig || currentPermit?.measuresImplementedSignature || ""}
-                                    disabled={!canEditExecution}
-                                  />
-                                </CardContent>
-                              </Card>
-
-                              {/* Measures Removed Signature */}
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle className="text-sm">2. Maßnahmen zurückgenommen</CardTitle>
-                                  <p className="text-xs text-gray-600">
-                                    Bestätigung, dass alle temporären Schutzmaßnahmen und Sperren ordnungsgemäß entfernt wurden
-                                  </p>
-                                </CardHeader>
-                                <CardContent>
-                                  <SignaturePad
-                                    onSignatureChange={(signature) => {
-                                      setMeasuresRemovedSig(signature);
-                                      form.setValue("measuresRemovedSignature", signature);
-                                    }}
-                                    existingSignature={measuresRemovedSig || currentPermit?.measuresRemovedSignature || ""}
-                                    disabled={!canEditExecution}
-                                  />
-                                </CardContent>
-                              </Card>
-                            </div>
-
-                            {/* Main Performer Signature */}
-                            <Card>
-                              <CardHeader>
-                                <CardTitle className="text-sm">3. Unterschrift Ausführende/r</CardTitle>
-                                <p className="text-xs text-gray-600">
-                                  Hauptverantwortliche Person für die Durchführung der Arbeiten
-                                </p>
-                              </CardHeader>
-                              <CardContent>
-                                <SignaturePad
-                                  onSignatureChange={(signature) => {
-                                    setPerformerSig(signature);
-                                    form.setValue("performerSignature", signature);
-                                  }}
-                                  existingSignature={performerSig || currentPermit?.performerSignature || ""}
-                                  disabled={!canEditExecution}
-                                />
-                              </CardContent>
-                            </Card>
-                          </div>
+                          <SignaturePad
+                            onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
+                            existingSignature={form.watch("performerSignature")}
+                            disabled={!canEditExecution}
+                          />
 
                           <Alert>
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              Alle digitalen Unterschriften werden auf dem gedruckten Arbeitserlaubnis angezeigt. 
-                              Die Zeitstempel dokumentieren wann die jeweiligen Unterschriften geleistet wurden.
+                              Die digitale Unterschrift wird auf dem gedruckten Arbeitserlaubnis angezeigt. 
+                              Stellen Sie sicher, dass alle Informationen korrekt sind, bevor Sie unterschreiben.
                             </AlertDescription>
                           </Alert>
                         </>
