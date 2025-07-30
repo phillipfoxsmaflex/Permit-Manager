@@ -42,6 +42,15 @@ A cutting-edge digital permit management system designed to streamline safety wo
 - Notification system for approvals and updates
 
 ## Recent Changes
+- **2025-07-30**: Unterschriftenfelder-Reihenfolge im Durchführung-Tab optimiert ✅
+  - Position der Unterschriftenkacheln getauscht für besseren chronologischen Ablauf
+  - Neue Reihenfolge: 1. Maßnahmen vor Arbeitsbeginn → 2. Unterschrift Ausführende/r → 3. Maßnahmen zurückgenommen
+  - Übersichtsbeschreibung entsprechend angepasst
+- **2025-07-30**: Vollständige Implementierung der erweiterten Unterschriftenfelder ✅
+  - Drei separate Unterschriftenfelder für vollständige Sicherheitsdokumentation implementiert
+  - Form-Schema, Default-Werte, Submit-Logik und Synchronisation vollständig erweitert
+  - Backend-Speicherung für alle vier neuen Datenbankfelder implementiert
+  - Unterschriften werden korrekt in Edit-Modal und Print-Seite angezeigt
 - **2025-07-17**: Docker-Kompatibilität für Map-Widget-System vollständig validiert ✅
   - Umfassende Kompatibilitätsprüfung für Docker-Deployment durchgeführt
   - Build-Prozess, Datenbankschema, Map-Widget-Features und Netzwerkkonfiguration getestet

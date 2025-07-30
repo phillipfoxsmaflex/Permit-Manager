@@ -1202,8 +1202,8 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                 <p className="font-semibold">Übersicht der Unterschriftenfelder:</p>
                                 <ul className="space-y-1 text-sm">
                                   <li><strong>1. Maßnahmen vor Arbeitsbeginn umgesetzt:</strong> Bestätigt, dass alle Sicherheitsmaßnahmen vor dem Arbeitsbeginn ordnungsgemäß durchgeführt wurden (z.B. Absperrungen, Belüftung, Schutzausrüstung).</li>
-                                  <li><strong>2. Maßnahmen zurückgenommen:</strong> Bestätigt, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende ordnungsgemäß zurückgebaut wurden (z.B. Absperrungen entfernt, Normalzustand wiederhergestellt).</li>
-                                  <li><strong>3. Unterschrift Ausführende/r:</strong> Allgemeine Bestätigung der Verantwortung für die ordnungsgemäße Durchführung der Arbeiten.</li>
+                                  <li><strong>2. Unterschrift Ausführende/r:</strong> Allgemeine Bestätigung der Verantwortung für die ordnungsgemäße Durchführung der Arbeiten.</li>
+                                  <li><strong>3. Maßnahmen zurückgenommen:</strong> Bestätigt, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende ordnungsgemäß zurückgebaut wurden (z.B. Absperrungen entfernt, Normalzustand wiederhergestellt).</li>
                                 </ul>
                               </div>
                             </AlertDescription>
@@ -1230,33 +1230,12 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                             </CardContent>
                           </Card>
 
-                          {/* Work Removal Signature */}
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="text-lg flex items-center gap-2">
-                                <RotateCcw className="h-5 w-5" />
-                                2. Maßnahmen zurückgenommen
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <p className="text-sm text-gray-600 mb-4">
-                                Mit dieser Unterschrift bestätigen Sie, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende 
-                                ordnungsgemäß zurückgebaut wurden (Absperrungen entfernt, Arbeitsstelle gereinigt, Normalzustand wiederhergestellt).
-                              </p>
-                              <SignaturePad
-                                onSignatureChange={(signature) => form.setValue("workRemovalSignature", signature)}
-                                existingSignature={form.watch("workRemovalSignature")}
-                                disabled={!canEditExecution}
-                              />
-                            </CardContent>
-                          </Card>
-
                           {/* Main Performer Signature */}
                           <Card>
                             <CardHeader>
                               <CardTitle className="text-lg flex items-center gap-2">
                                 <PenTool className="h-5 w-5" />
-                                3. Unterschrift Ausführende/r
+                                2. Unterschrift Ausführende/r
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -1267,6 +1246,27 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                               <SignaturePad
                                 onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
                                 existingSignature={form.watch("performerSignature")}
+                                disabled={!canEditExecution}
+                              />
+                            </CardContent>
+                          </Card>
+
+                          {/* Work Removal Signature */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <RotateCcw className="h-5 w-5" />
+                                3. Maßnahmen zurückgenommen
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Mit dieser Unterschrift bestätigen Sie, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende 
+                                ordnungsgemäß zurückgebaut wurden (Absperrungen entfernt, Arbeitsstelle gereinigt, Normalzustand wiederhergestellt).
+                              </p>
+                              <SignaturePad
+                                onSignatureChange={(signature) => form.setValue("workRemovalSignature", signature)}
+                                existingSignature={form.watch("workRemovalSignature")}
                                 disabled={!canEditExecution}
                               />
                             </CardContent>
