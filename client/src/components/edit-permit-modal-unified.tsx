@@ -1202,7 +1202,7 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                               </AlertDescription>
                             </Alert>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-6">
                               {/* Measures Implemented Signature */}
                               <Card>
                                 <CardHeader>
@@ -1224,7 +1224,7 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                   />
                                   {form.watch("measuresImplementedAt") && (
                                     <p className="text-xs text-gray-500 mt-2">
-                                      Unterschrieben: {new Date(form.watch("measuresImplementedAt")).toLocaleString('de-DE')}
+                                      Unterschrieben: {new Date(form.watch("measuresImplementedAt") || '').toLocaleString('de-DE')}
                                     </p>
                                   )}
                                 </CardContent>
@@ -1251,7 +1251,7 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                   />
                                   {form.watch("measuresRemovedAt") && (
                                     <p className="text-xs text-gray-500 mt-2">
-                                      Unterschrieben: {new Date(form.watch("measuresRemovedAt")).toLocaleString('de-DE')}
+                                      Unterschrieben: {new Date(form.watch("measuresRemovedAt") || '').toLocaleString('de-DE')}
                                     </p>
                                   )}
                                 </CardContent>
