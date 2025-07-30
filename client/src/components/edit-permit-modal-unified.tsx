@@ -467,27 +467,24 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
     console.log("Hazard notes:", hazardNotes);
     console.log("Permit map position:", permitMapPosition);
     
-    // Get signature values directly from form to ensure we have the latest values
-    const measuresImplementedSig = form.getValues("measuresImplementedSignature");
-    const measuresRemovedSig = form.getValues("measuresRemovedSignature");
-    const performerSig = form.getValues("performerSignature");
+    // Force trigger dirty state for signature fields to include them in form data
+    form.trigger(["measuresImplementedSignature", "measuresRemovedSignature", "performerSignature"]);
     
-    console.log("Direct form values check:", {
-      measuresImplementedSignature: measuresImplementedSig ? 'present' : 'not present',
-      measuresRemovedSignature: measuresRemovedSig ? 'present' : 'not present',
-      performerSignature: performerSig ? 'present' : 'not present',
+    // Get all form values including signatures
+    const allFormValues = form.getValues();
+    
+    console.log("All form values:", {
+      measuresImplementedSignature: allFormValues.measuresImplementedSignature ? 'present' : 'not present',
+      measuresRemovedSignature: allFormValues.measuresRemovedSignature ? 'present' : 'not present',
+      performerSignature: allFormValues.performerSignature ? 'present' : 'not present',
     });
     
-    // Add map position and ensure signature fields are explicitly included
+    // Create submit data using all form values instead of just the onSubmit data parameter
     const submitData = {
-      ...data,
+      ...allFormValues,
       mapPosition: permitMapPosition ? JSON.stringify(permitMapPosition) : null,
       selectedHazards,
       hazardNotes: JSON.stringify(hazardNotes),
-      // Explicitly include signature fields from form values
-      measuresImplementedSignature: measuresImplementedSig || null,
-      measuresRemovedSignature: measuresRemovedSig || null,
-      performerSignature: performerSig || null,
     };
     
     console.log("Final submit data signatures:", {
