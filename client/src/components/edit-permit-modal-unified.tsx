@@ -49,7 +49,7 @@ import { MapPositionSelector } from "@/components/map-position-selector";
 import trbsData from "@/data/trbs_complete_hazards.json";
 import { WORKFLOW_CONFIG } from "@/lib/workflow-config";
 import { canEditPermit } from "@/lib/permissions";
-import { AlertTriangle, Info, Save, Activity, FileText, Users, Settings, Brain, GitBranch } from "lucide-react";
+import { AlertTriangle, Info, Save, Activity, FileText, Users, Settings, Brain, GitBranch, CheckCircle, RotateCcw, PenTool } from "lucide-react";
 
 interface EditPermitModalUnifiedProps {
   permit: Permit | null;
@@ -1178,16 +1178,88 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                             />
                           </div>
 
-                          <SignaturePad
-                            onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
-                            existingSignature={form.watch("performerSignature")}
-                            disabled={!canEditExecution}
-                          />
+                          {/* Beschreibung der Unterschriftenfelder */}
+                          <Alert className="mb-6">
+                            <Info className="h-4 w-4" />
+                            <AlertDescription>
+                              <div className="space-y-2">
+                                <p className="font-semibold">Übersicht der Unterschriftenfelder:</p>
+                                <ul className="space-y-1 text-sm">
+                                  <li><strong>1. Maßnahmen vor Arbeitsbeginn umgesetzt:</strong> Bestätigt, dass alle Sicherheitsmaßnahmen vor dem Arbeitsbeginn ordnungsgemäß durchgeführt wurden (z.B. Absperrungen, Belüftung, Schutzausrüstung).</li>
+                                  <li><strong>2. Maßnahmen zurückgenommen:</strong> Bestätigt, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende ordnungsgemäß zurückgebaut wurden (z.B. Absperrungen entfernt, Normalzustand wiederhergestellt).</li>
+                                  <li><strong>3. Unterschrift Ausführende/r:</strong> Allgemeine Bestätigung der Verantwortung für die ordnungsgemäße Durchführung der Arbeiten.</li>
+                                </ul>
+                              </div>
+                            </AlertDescription>
+                          </Alert>
+
+                          {/* Pre-Work Measures Signature */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <CheckCircle className="h-5 w-5" />
+                                1. Maßnahmen vor Arbeitsbeginn umgesetzt
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Mit dieser Unterschrift bestätigen Sie, dass alle erforderlichen Sicherheitsmaßnahmen vor Arbeitsbeginn 
+                                ordnungsgemäß durchgeführt wurden (Absperrungen, Belüftung, Schutzausrüstung, etc.).
+                              </p>
+                              <SignaturePad
+                                onSignatureChange={(signature) => form.setValue("preWorkMeasuresSignature", signature)}
+                                existingSignature={form.watch("preWorkMeasuresSignature")}
+                                disabled={!canEditExecution}
+                              />
+                            </CardContent>
+                          </Card>
+
+                          {/* Work Removal Signature */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <RotateCcw className="h-5 w-5" />
+                                2. Maßnahmen zurückgenommen
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Mit dieser Unterschrift bestätigen Sie, dass alle temporären Sicherheitsmaßnahmen nach Arbeitsende 
+                                ordnungsgemäß zurückgebaut wurden (Absperrungen entfernt, Arbeitsstelle gereinigt, Normalzustand wiederhergestellt).
+                              </p>
+                              <SignaturePad
+                                onSignatureChange={(signature) => form.setValue("workRemovalSignature", signature)}
+                                existingSignature={form.watch("workRemovalSignature")}
+                                disabled={!canEditExecution}
+                              />
+                            </CardContent>
+                          </Card>
+
+                          {/* Main Performer Signature */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <PenTool className="h-5 w-5" />
+                                3. Unterschrift Ausführende/r
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Allgemeine Bestätigung der Verantwortung für die ordnungsgemäße Durchführung der Arbeiten gemäß den Vorgaben 
+                                und Sicherheitsbestimmungen dieser Arbeitserlaubnis.
+                              </p>
+                              <SignaturePad
+                                onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
+                                existingSignature={form.watch("performerSignature")}
+                                disabled={!canEditExecution}
+                              />
+                            </CardContent>
+                          </Card>
 
                           <Alert>
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              Die digitale Unterschrift wird auf dem gedruckten Arbeitserlaubnis angezeigt. 
+                              Alle digitalen Unterschriften werden auf dem gedruckten Arbeitserlaubnis angezeigt. 
                               Stellen Sie sicher, dass alle Informationen korrekt sind, bevor Sie unterschreiben.
                             </AlertDescription>
                           </Alert>

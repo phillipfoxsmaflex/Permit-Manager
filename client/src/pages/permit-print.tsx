@@ -357,6 +357,51 @@ export default function PermitPrint() {
               </div>
             )}
 
+            {/* Pre-Work Measures Signature */}
+            <div className="mt-4 p-3 border-l-4 border-blue-500 bg-blue-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <strong>1. Maßnahmen vor Arbeitsbeginn umgesetzt:</strong>
+                  <div className="mt-2 border p-3 bg-white h-20 flex items-end">
+                    {permit.preWorkMeasuresSignature ? (
+                      <img 
+                        src={permit.preWorkMeasuresSignature} 
+                        alt="Unterschrift Maßnahmen umgesetzt" 
+                        className="max-h-16 w-auto"
+                      />
+                    ) : (
+                      <div className="text-gray-400 text-xs">Unterschrift ausstehend</div>
+                    )}
+                  </div>
+                  {permit.preWorkMeasuresDate && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Datum: {formatDateTime(permit.preWorkMeasuresDate)}
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <strong>2. Maßnahmen zurückgenommen:</strong>
+                  <div className="mt-2 border p-3 bg-white h-20 flex items-end">
+                    {permit.workRemovalSignature ? (
+                      <img 
+                        src={permit.workRemovalSignature} 
+                        alt="Unterschrift Maßnahmen zurückgenommen" 
+                        className="max-h-16 w-auto"
+                      />
+                    ) : (
+                      <div className="text-gray-400 text-xs">Unterschrift ausstehend</div>
+                    )}
+                  </div>
+                  {permit.workRemovalDate && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Datum: {formatDateTime(permit.workRemovalDate)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {permit.immediateActions && (
               <div>
                 <strong>Sofortmaßnahmen:</strong><br />
@@ -375,14 +420,14 @@ export default function PermitPrint() {
               </div>
             )}
 
-            {/* Signature */}
+            {/* Main Performer Signature */}
             {permit.performerSignature && (
               <div>
                 <strong>Unterschrift Ausführende/r:</strong><br />
                 <div className="mt-1 border p-2 bg-gray-50">
                   <img 
                     src={permit.performerSignature} 
-                    alt="Unterschrift" 
+                    alt="Unterschrift Ausführende/r" 
                     className="max-h-16 w-auto"
                   />
                 </div>

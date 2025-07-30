@@ -64,6 +64,12 @@ export const permits = pgTable("permits", {
   workStartedAt: timestamp("work_started_at"),
   workCompletedAt: timestamp("work_completed_at"),
   
+  // Additional execution signatures for safety measures
+  preWorkMeasuresSignature: text("pre_work_measures_signature"), // Unterschrift für Maßnahmen vor Arbeitsbeginn
+  preWorkMeasuresDate: timestamp("pre_work_measures_date"),
+  workRemovalSignature: text("work_removal_signature"), // Unterschrift für Maßnahmen zurückgenommen
+  workRemovalDate: timestamp("work_removal_date"),
+  
   // Safety assessment fields - AI recommendations
   immediateActions: text("immediate_actions"), // JSON array of immediate actions needed
   beforeWorkStarts: text("before_work_starts"), // JSON array of actions before work begins
