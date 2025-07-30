@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavigationHeader } from "@/components/navigation-header";
 import { WorkLocationManagement } from "@/components/work-location-management";
 import { MapBackgroundManagement } from "@/components/map-background-management";
+import { AuditTrailView } from "@/components/audit-trail-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -432,6 +433,7 @@ export default function Settings() {
   
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [auditTrailModalOpen, setAuditTrailModalOpen] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -676,10 +678,7 @@ export default function Settings() {
   };
 
   const handleViewSecurityLog = () => {
-    toast({
-      title: "Sicherheitsprotokoll",
-      description: "Öffne Sicherheitsprotokoll-Viewer",
-    });
+    setAuditTrailModalOpen(true);
   };
 
   const handleSaveEmailSettings = () => {
@@ -1217,6 +1216,24 @@ export default function Settings() {
                 Abbrechen
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit Trail Modal */}
+      <Dialog open={auditTrailModalOpen} onOpenChange={setAuditTrailModalOpen}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Sicherheitsprotokoll - Audit Trail
+            </DialogTitle>
+            <DialogDescription>
+              Vollständige Übersicht aller Systemänderungen und Benutzeraktivitäten
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-auto">
+            <AuditTrailView className="max-h-[70vh]" />
           </div>
         </DialogContent>
       </Dialog>

@@ -1,4 +1,4 @@
-import { users, permits, notifications, templates, aiSuggestions, webhookConfig, workLocations, permitAttachments, sessions, systemSettings, mapBackgrounds, type User, type InsertUser, type Permit, type InsertPermit, type Notification, type InsertNotification, type Template, type InsertTemplate, type AiSuggestion, type InsertAiSuggestion, type WebhookConfig, type InsertWebhookConfig, type WorkLocation, type InsertWorkLocation, type PermitAttachment, type InsertPermitAttachment, type Session, type InsertSession, type SystemSettings, type InsertSystemSettings, type MapBackground, type InsertMapBackground } from "@shared/schema";
+import { users, permits, notifications, templates, aiSuggestions, webhookConfig, workLocations, permitAttachments, sessions, systemSettings, mapBackgrounds, auditLogs, type User, type InsertUser, type Permit, type InsertPermit, type Notification, type InsertNotification, type Template, type InsertTemplate, type AiSuggestion, type InsertAiSuggestion, type WebhookConfig, type InsertWebhookConfig, type WorkLocation, type InsertWorkLocation, type PermitAttachment, type InsertPermitAttachment, type Session, type InsertSession, type SystemSettings, type InsertSystemSettings, type MapBackground, type InsertMapBackground, type AuditLog, type InsertAuditLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, like, lt } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -109,6 +109,23 @@ export interface IStorage {
   // Map operations
   getPermitsForMap(): Promise<Permit[]>;
   updateWorkLocationPosition(id: number, x: number, y: number): Promise<WorkLocation | undefined>;
+
+  // Audit Log operations
+  getPermitAuditLogs(permitId: number): Promise<any[]>;
+  getAllAuditLogs(filters?: {
+    userId?: number;
+    permitId?: number;
+    actionType?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]>;
+  getAuditLogStats(): Promise<{
+    totalLogs: number;
+    todayLogs: number;
+    recentActions: { actionType: string; count: number }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1438,6 +1455,145 @@ export class DatabaseStorage implements IStorage {
       mapPositionY: y
     }).where(eq(workLocations.id, id)).returning();
     return location;
+  }
+
+  // Audit Log operations
+  async getPermitAuditLogs(permitId: number): Promise<any[]> {
+    const logs = await db
+      .select({
+        id: auditLogs.id,
+        actionType: auditLogs.actionType,
+        fieldName: auditLogs.fieldName,
+        oldValue: auditLogs.oldValue,
+        newValue: auditLogs.newValue,
+        ipAddress: auditLogs.ipAddress,
+        userAgent: auditLogs.userAgent,
+        metadata: auditLogs.metadata,
+        createdAt: auditLogs.createdAt,
+        userId: auditLogs.userId,
+        // Join user information
+        userName: users.username,
+        userFullName: users.fullName
+      })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .where(eq(auditLogs.permitId, permitId))
+      .orderBy(desc(auditLogs.createdAt));
+
+    return logs;
+  }
+
+  async getAllAuditLogs(filters?: {
+    userId?: number;
+    permitId?: number;
+    actionType?: string;
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]> {
+    let query = db
+      .select({
+        id: auditLogs.id,
+        permitId: auditLogs.permitId,
+        userId: auditLogs.userId,
+        actionType: auditLogs.actionType,
+        fieldName: auditLogs.fieldName,
+        oldValue: auditLogs.oldValue,
+        newValue: auditLogs.newValue,
+        ipAddress: auditLogs.ipAddress,
+        userAgent: auditLogs.userAgent,
+        metadata: auditLogs.metadata,
+        createdAt: auditLogs.createdAt,
+        // Join user and permit information
+        userName: users.username,
+        userFullName: users.fullName,
+        permitIdString: permits.permitId,
+        permitType: permits.type
+      })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .leftJoin(permits, eq(auditLogs.permitId, permits.id));
+
+    // Apply filters if provided
+    const conditions = [];
+    if (filters?.userId) {
+      conditions.push(eq(auditLogs.userId, filters.userId));
+    }
+    if (filters?.permitId) {
+      conditions.push(eq(auditLogs.permitId, filters.permitId));
+    }
+    if (filters?.actionType) {
+      conditions.push(eq(auditLogs.actionType, filters.actionType));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    query = query.orderBy(desc(auditLogs.createdAt));
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+
+    return await query;
+  }
+
+  async getAuditLogStats(): Promise<{
+    totalLogs: number;
+    todayLogs: number;
+    recentActions: { actionType: string; count: number }[];
+  }> {
+    try {
+      // Get total count
+      const totalResult = await db
+        .select({ count: db.sql`COUNT(*)`.as('count') })
+        .from(auditLogs);
+      const totalLogs = Number(totalResult[0]?.count || 0);
+
+      // Get today's count
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayResult = await db
+        .select({ count: db.sql`COUNT(*)`.as('count') })
+        .from(auditLogs)
+        .where(db.gte(auditLogs.createdAt, today));
+      const todayLogs = Number(todayResult[0]?.count || 0);
+
+      // Get recent action types
+      const recentActionsResult = await db
+        .select({
+          actionType: auditLogs.actionType,
+          count: db.sql`COUNT(*)`.as('count')
+        })
+        .from(auditLogs)
+        .where(db.gte(auditLogs.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))) // Last 7 days
+        .groupBy(auditLogs.actionType)
+        .orderBy(desc(db.sql`COUNT(*)`))
+        .limit(5);
+
+      const recentActions = recentActionsResult.map(row => ({
+        actionType: row.actionType,
+        count: Number(row.count)
+      }));
+
+      return {
+        totalLogs,
+        todayLogs,
+        recentActions
+      };
+    } catch (error) {
+      console.error('Error getting audit log stats:', error);
+      return {
+        totalLogs: 0,
+        todayLogs: 0,
+        recentActions: []
+      };
+    }
   }
 }
 

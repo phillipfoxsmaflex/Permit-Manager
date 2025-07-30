@@ -5,6 +5,7 @@ import fs from "fs";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "./storage";
+import { auditLogger } from "./audit-logger";
 import { insertPermitSchema, insertDraftPermitSchema, insertPermitAttachmentSchema } from "@shared/schema";
 import { z } from "zod";
 import { fileURLToPath } from 'url';
@@ -525,6 +526,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const permit = await storage.createPermit(permitData as any);
       console.log("Created permit:", permit);
+
+      // Log creation for audit trail
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        const session = await storage.getSessionBySessionId(sessionId);
+        if (session) {
+          await auditLogger.logPermitCreation(permit, {
+            userId: session.userId,
+            actionType: 'create',
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent'),
+            metadata: {
+              permitType: permit.type,
+              initialStatus: permit.status
+            }
+          });
+        }
+      }
       
       res.status(201).json(permit);
     } catch (error) {
@@ -627,12 +646,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Get original permit for audit logging
+      const originalPermit = await storage.getPermit(id);
+      
       const permit = await storage.updatePermit(id, updates);
       
       if (!permit) {
         return res.status(404).json({ 
           message: "Genehmigung nicht gefunden. Möglicherweise wurde sie bereits gelöscht."
         });
+      }
+
+      // Log the changes for audit trail
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        const session = await storage.getSessionBySessionId(sessionId);
+        if (session) {
+          await auditLogger.logPermitChanges(originalPermit, permit, {
+            userId: session.userId,
+            actionType: 'update',
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent'),
+            metadata: {
+              updatedFields: Object.keys(updates),
+              permitStatus: permit.status
+            }
+          });
+        }
       }
       
       res.json(permit);
@@ -680,6 +720,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Admin ${user.username} requesting deletion of permit ${id}`);
       
+      // Get permit before deletion for audit logging
+      const permitToDelete = await storage.getPermit(id);
+      if (!permitToDelete) {
+        return res.status(404).json({ message: "Permit not found" });
+      }
+
+      // Log deletion for audit trail
+      await auditLogger.logPermitDeletion(permitToDelete, {
+        userId: user.id,
+        actionType: 'delete',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        metadata: {
+          adminUsername: user.username,
+          deletionReason: 'Admin deletion'
+        }
+      });
+
       // Delete permit and all associated data
       const deleted = await storage.deletePermit(id);
       
@@ -2576,6 +2634,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       log(`Error updating work location position: ${error}`);
       res.status(500).json({ message: "Failed to update work location position" });
+    }
+  });
+
+  // Audit Log API endpoints
+  app.get("/api/audit-logs", requireAuth, async (req, res) => {
+    try {
+      const filters = {
+        userId: req.query.userId ? parseInt(req.query.userId as string) : undefined,
+        permitId: req.query.permitId ? parseInt(req.query.permitId as string) : undefined,
+        actionType: req.query.actionType as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0
+      };
+      
+      const logs = await storage.getAllAuditLogs(filters);
+      res.json(logs);
+    } catch (error) {
+      log(`Error fetching audit logs: ${error}`);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  app.get("/api/permits/:id/audit-logs", requireAuth, async (req, res) => {
+    try {
+      const permitId = parseInt(req.params.id);
+      const logs = await storage.getPermitAuditLogs(permitId);
+      res.json(logs);
+    } catch (error) {
+      log(`Error fetching permit audit logs: ${error}`);
+      res.status(500).json({ message: "Failed to fetch permit audit logs" });
+    }
+  });
+
+  app.get("/api/audit-logs/stats", requireAuth, async (req, res) => {
+    try {
+      const stats = await storage.getAuditLogStats();
+      res.json(stats);
+    } catch (error) {
+      log(`Error fetching audit log stats: ${error}`);
+      res.status(500).json({ message: "Failed to fetch audit log stats" });
     }
   });
 

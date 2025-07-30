@@ -182,6 +182,21 @@ export const systemSettings = pgTable("system_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Audit Trail table for comprehensive change tracking
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  permitId: integer("permit_id").references(() => permits.id),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  actionType: text("action_type").notNull(), // 'create', 'update', 'delete', 'status_change', 'approval', 'signature'
+  fieldName: text("field_name"), // Specific field that was changed
+  oldValue: text("old_value"), // Previous value (JSON for complex objects)
+  newValue: text("new_value"), // New value (JSON for complex objects)
+  ipAddress: text("ip_address"), // Client IP for security
+  userAgent: text("user_agent"), // Browser/Client information
+  metadata: jsonb("metadata"), // Additional context data
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
 });
@@ -288,6 +303,11 @@ export const insertSystemSettingsSchema = createInsertSchema(systemSettings).omi
   updatedAt: true,
 });
 
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPermit = z.infer<typeof insertPermitSchema>;
@@ -310,3 +330,5 @@ export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
 export type SystemSettings = typeof systemSettings.$inferSelect;
 export type InsertMapBackground = z.infer<typeof insertMapBackgroundSchema>;
 export type MapBackground = typeof mapBackgrounds.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
