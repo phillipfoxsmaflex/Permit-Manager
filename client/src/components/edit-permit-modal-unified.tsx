@@ -90,6 +90,10 @@ const permitSchema = z.object({
   overallRisk: z.string().optional(),
   positionX: z.number().optional(),
   positionY: z.number().optional(),
+  measuresImplementedSignature: z.string().optional(),
+  measuresImplementedAt: z.string().optional(),
+  measuresRemovedSignature: z.string().optional(),
+  measuresRemovedAt: z.string().optional(),
 });
 
 type PermitFormData = z.infer<typeof permitSchema>;
@@ -170,6 +174,10 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
       overallRisk: "",
       positionX: mapClickPosition?.x,
       positionY: mapClickPosition?.y,
+      measuresImplementedSignature: "",
+      measuresImplementedAt: "",
+      measuresRemovedSignature: "",
+      measuresRemovedAt: "",
     },
   });
 
@@ -385,6 +393,10 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
         beforeWorkStarts: currentPermit.beforeWorkStarts || "",
         complianceNotes: currentPermit.complianceNotes || "",
         overallRisk: currentPermit.overallRisk || "",
+        measuresImplementedSignature: currentPermit.measuresImplementedSignature || "",
+        measuresImplementedAt: formatDate(currentPermit.measuresImplementedAt),
+        measuresRemovedSignature: currentPermit.measuresRemovedSignature || "",
+        measuresRemovedAt: formatDate(currentPermit.measuresRemovedAt),
       };
 
       console.log("Form data being set:", {
@@ -1178,17 +1190,97 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                             />
                           </div>
 
-                          <SignaturePad
-                            onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
-                            existingSignature={form.watch("performerSignature")}
-                            disabled={!canEditExecution}
-                          />
+                          {/* Execution Signature Fields */}
+                          <div className="space-y-6">
+                            <Alert>
+                              <Info className="h-4 w-4" />
+                              <AlertDescription>
+                                <strong>Unterschriften für die Arbeitsdurchführung:</strong><br />
+                                1. <strong>Maßnahmen vor Arbeitsbeginn umgesetzt:</strong> Bestätigung, dass alle Sicherheitsmaßnahmen und Vorkehrungen getroffen wurden<br />
+                                2. <strong>Maßnahmen zurückgenommen:</strong> Bestätigung, dass alle temporären Schutzmaßnahmen ordnungsgemäß entfernt wurden<br />
+                                3. <strong>Unterschrift Ausführende/r:</strong> Hauptverantwortliche/r für die Arbeiten
+                              </AlertDescription>
+                            </Alert>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Measures Implemented Signature */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-sm">1. Maßnahmen vor Arbeitsbeginn umgesetzt</CardTitle>
+                                  <p className="text-xs text-gray-600">
+                                    Bestätigung, dass alle Sicherheitsmaßnahmen, Sperrungen und Vorkehrungen ordnungsgemäß durchgeführt wurden
+                                  </p>
+                                </CardHeader>
+                                <CardContent>
+                                  <SignaturePad
+                                    onSignatureChange={(signature) => {
+                                      form.setValue("measuresImplementedSignature", signature);
+                                      if (signature) {
+                                        form.setValue("measuresImplementedAt", new Date().toISOString());
+                                      }
+                                    }}
+                                    existingSignature={form.watch("measuresImplementedSignature")}
+                                    disabled={!canEditExecution}
+                                  />
+                                  {form.watch("measuresImplementedAt") && (
+                                    <p className="text-xs text-gray-500 mt-2">
+                                      Unterschrieben: {new Date(form.watch("measuresImplementedAt")).toLocaleString('de-DE')}
+                                    </p>
+                                  )}
+                                </CardContent>
+                              </Card>
+
+                              {/* Measures Removed Signature */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-sm">2. Maßnahmen zurückgenommen</CardTitle>
+                                  <p className="text-xs text-gray-600">
+                                    Bestätigung, dass alle temporären Schutzmaßnahmen und Sperren ordnungsgemäß entfernt wurden
+                                  </p>
+                                </CardHeader>
+                                <CardContent>
+                                  <SignaturePad
+                                    onSignatureChange={(signature) => {
+                                      form.setValue("measuresRemovedSignature", signature);
+                                      if (signature) {
+                                        form.setValue("measuresRemovedAt", new Date().toISOString());
+                                      }
+                                    }}
+                                    existingSignature={form.watch("measuresRemovedSignature")}
+                                    disabled={!canEditExecution}
+                                  />
+                                  {form.watch("measuresRemovedAt") && (
+                                    <p className="text-xs text-gray-500 mt-2">
+                                      Unterschrieben: {new Date(form.watch("measuresRemovedAt")).toLocaleString('de-DE')}
+                                    </p>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            {/* Main Performer Signature */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-sm">3. Unterschrift Ausführende/r</CardTitle>
+                                <p className="text-xs text-gray-600">
+                                  Hauptverantwortliche Person für die Durchführung der Arbeiten
+                                </p>
+                              </CardHeader>
+                              <CardContent>
+                                <SignaturePad
+                                  onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
+                                  existingSignature={form.watch("performerSignature")}
+                                  disabled={!canEditExecution}
+                                />
+                              </CardContent>
+                            </Card>
+                          </div>
 
                           <Alert>
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              Die digitale Unterschrift wird auf dem gedruckten Arbeitserlaubnis angezeigt. 
-                              Stellen Sie sicher, dass alle Informationen korrekt sind, bevor Sie unterschreiben.
+                              Alle digitalen Unterschriften werden auf dem gedruckten Arbeitserlaubnis angezeigt. 
+                              Die Zeitstempel dokumentieren wann die jeweiligen Unterschriften geleistet wurden.
                             </AlertDescription>
                           </Alert>
                         </>

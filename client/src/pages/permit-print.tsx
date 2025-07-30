@@ -375,9 +375,52 @@ export default function PermitPrint() {
               </div>
             )}
 
-            {/* Signature */}
-            {permit.performerSignature && (
+            {/* Execution Signatures */}
+            <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-300">
               <div>
+                <strong>Maßnahmen vor Arbeitsbeginn umgesetzt:</strong>
+                {permit.measuresImplementedSignature ? (
+                  <div className="mt-1 border p-2 bg-gray-50">
+                    <img 
+                      src={permit.measuresImplementedSignature} 
+                      alt="Unterschrift Maßnahmen umgesetzt" 
+                      className="max-h-16 w-auto"
+                    />
+                    <div className="text-xs text-gray-600 mt-1">
+                      {permit.measuresImplementedAt ? formatDateTime(permit.measuresImplementedAt) : ''}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-1 border p-2 bg-gray-100 h-20 flex items-center justify-center text-gray-500 text-xs">
+                    Unterschrift ausstehend
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <strong>Maßnahmen zurückgenommen:</strong>
+                {permit.measuresRemovedSignature ? (
+                  <div className="mt-1 border p-2 bg-gray-50">
+                    <img 
+                      src={permit.measuresRemovedSignature} 
+                      alt="Unterschrift Maßnahmen zurückgenommen" 
+                      className="max-h-16 w-auto"
+                    />
+                    <div className="text-xs text-gray-600 mt-1">
+                      {permit.measuresRemovedAt ? formatDateTime(permit.measuresRemovedAt) : ''}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-1 border p-2 bg-gray-100 h-20 flex items-center justify-center text-gray-500 text-xs">
+                    Unterschrift ausstehend
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Main Performer Signature */}
+            {permit.performerSignature && (
+              <div className="mt-4 pt-4 border-t border-gray-300">
                 <strong>Unterschrift Ausführende/r:</strong><br />
                 <div className="mt-1 border p-2 bg-gray-50">
                   <img 
