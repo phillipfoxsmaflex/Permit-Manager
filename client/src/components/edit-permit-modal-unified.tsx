@@ -108,6 +108,11 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
   const [selectedHazards, setSelectedHazards] = useState<string[]>([]);
   const [selectedMapBackground, setSelectedMapBackground] = useState<MapBackground | null>(null);
   const [permitMapPosition, setPermitMapPosition] = useState<{ x: number, y: number } | null>(null);
+  
+  // Explicit signature state management to ensure data is preserved
+  const [measuresImplementedSig, setMeasuresImplementedSig] = useState<string>("");
+  const [measuresRemovedSig, setMeasuresRemovedSig] = useState<string>("");
+  const [performerSig, setPerformerSig] = useState<string>("");
 
 
   // Dropdown data queries
@@ -458,6 +463,13 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
         // Reset hazardNotes if empty
         setHazardNotes({});
       }
+      
+      // Initialize signature states from permit data
+      if (currentPermit) {
+        setMeasuresImplementedSig(currentPermit.measuresImplementedSignature || "");
+        setMeasuresRemovedSig(currentPermit.measuresRemovedSignature || "");
+        setPerformerSig(currentPermit.performerSignature || "");
+      }
     }
   }, [currentPermit, mode]); // Vereinfachte Dependency - watch das gesamte currentPermit Objekt
 
@@ -467,27 +479,25 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
     console.log("Hazard notes:", hazardNotes);
     console.log("Permit map position:", permitMapPosition);
     
-    // Force trigger dirty state for signature fields to include them in form data
-    form.trigger(["measuresImplementedSignature", "measuresRemovedSignature", "performerSignature"]);
-    
-    // Get all form values including signatures
-    const allFormValues = form.getValues();
-    
-    console.log("All form values:", {
-      measuresImplementedSignature: allFormValues.measuresImplementedSignature ? 'present' : 'not present',
-      measuresRemovedSignature: allFormValues.measuresRemovedSignature ? 'present' : 'not present',
-      performerSignature: allFormValues.performerSignature ? 'present' : 'not present',
+    console.log("Explicit signature states:", {
+      measuresImplementedSig: measuresImplementedSig ? 'present' : 'not present',  
+      measuresRemovedSig: measuresRemovedSig ? 'present' : 'not present',
+      performerSig: performerSig ? 'present' : 'not present',
     });
     
-    // Create submit data using all form values instead of just the onSubmit data parameter
+    // Use explicit signature states instead of form values
     const submitData = {
-      ...allFormValues,
+      ...data,
       mapPosition: permitMapPosition ? JSON.stringify(permitMapPosition) : null,
       selectedHazards,
       hazardNotes: JSON.stringify(hazardNotes),
+      // Use explicit signature states
+      measuresImplementedSignature: measuresImplementedSig || null,
+      measuresRemovedSignature: measuresRemovedSig || null,
+      performerSignature: performerSig || null,
     };
     
-    console.log("Final submit data signatures:", {
+    console.log("Final submit data signatures from explicit states:", {
       measuresImplementedSignature: submitData.measuresImplementedSignature ? 'present' : 'not present',
       measuresRemovedSignature: submitData.measuresRemovedSignature ? 'present' : 'not present',
       performerSignature: submitData.performerSignature ? 'present' : 'not present',
@@ -1231,8 +1241,11 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                 </CardHeader>
                                 <CardContent>
                                   <SignaturePad
-                                    onSignatureChange={(signature) => form.setValue("measuresImplementedSignature", signature)}
-                                    existingSignature={form.watch("measuresImplementedSignature")}
+                                    onSignatureChange={(signature) => {
+                                      setMeasuresImplementedSig(signature);
+                                      form.setValue("measuresImplementedSignature", signature);
+                                    }}
+                                    existingSignature={measuresImplementedSig || currentPermit?.measuresImplementedSignature || ""}
                                     disabled={!canEditExecution}
                                   />
                                 </CardContent>
@@ -1248,8 +1261,11 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                                 </CardHeader>
                                 <CardContent>
                                   <SignaturePad
-                                    onSignatureChange={(signature) => form.setValue("measuresRemovedSignature", signature)}
-                                    existingSignature={form.watch("measuresRemovedSignature")}
+                                    onSignatureChange={(signature) => {
+                                      setMeasuresRemovedSig(signature);
+                                      form.setValue("measuresRemovedSignature", signature);
+                                    }}
+                                    existingSignature={measuresRemovedSig || currentPermit?.measuresRemovedSignature || ""}
                                     disabled={!canEditExecution}
                                   />
                                 </CardContent>
@@ -1266,8 +1282,11 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
                               </CardHeader>
                               <CardContent>
                                 <SignaturePad
-                                  onSignatureChange={(signature) => form.setValue("performerSignature", signature)}
-                                  existingSignature={form.watch("performerSignature")}
+                                  onSignatureChange={(signature) => {
+                                    setPerformerSig(signature);
+                                    form.setValue("performerSignature", signature);
+                                  }}
+                                  existingSignature={performerSig || currentPermit?.performerSignature || ""}
                                   disabled={!canEditExecution}
                                 />
                               </CardContent>
