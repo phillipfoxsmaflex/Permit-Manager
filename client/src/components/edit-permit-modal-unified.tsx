@@ -469,11 +469,25 @@ export function EditPermitModalUnified({ permit, open, onOpenChange, mode = 'edi
     console.log("Hazard notes:", hazardNotes);
     console.log("Permit map position:", permitMapPosition);
     
-    // Add map position to the data
+    // Add map position and ensure all execution signature fields are included
     const submitData = {
       ...data,
       mapPosition: permitMapPosition ? JSON.stringify(permitMapPosition) : null,
+      selectedHazards,
+      hazardNotes: JSON.stringify(hazardNotes),
+      // Ensure signature fields are explicitly included
+      measuresImplementedSignature: data.measuresImplementedSignature || null,
+      measuresImplementedAt: data.measuresImplementedAt || null,
+      measuresRemovedSignature: data.measuresRemovedSignature || null,
+      measuresRemovedAt: data.measuresRemovedAt || null,
     };
+    
+    console.log("Submit data with signatures:", {
+      measuresImplementedSignature: submitData.measuresImplementedSignature,
+      measuresImplementedAt: submitData.measuresImplementedAt,
+      measuresRemovedSignature: submitData.measuresRemovedSignature,
+      measuresRemovedAt: submitData.measuresRemovedAt,
+    });
     
     submitMutation.mutate(submitData);
   };
