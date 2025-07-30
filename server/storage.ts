@@ -1,6 +1,6 @@
 import { users, permits, notifications, templates, aiSuggestions, webhookConfig, workLocations, permitAttachments, sessions, systemSettings, mapBackgrounds, auditLogs, type User, type InsertUser, type Permit, type InsertPermit, type Notification, type InsertNotification, type Template, type InsertTemplate, type AiSuggestion, type InsertAiSuggestion, type WebhookConfig, type InsertWebhookConfig, type WorkLocation, type InsertWorkLocation, type PermitAttachment, type InsertPermitAttachment, type Session, type InsertSession, type SystemSettings, type InsertSystemSettings, type MapBackground, type InsertMapBackground, type AuditLog, type InsertAuditLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, like, lt } from "drizzle-orm";
+import { eq, and, desc, like, lt, or, gte, lte, asc, inArray, ne, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -1442,7 +1442,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMapBackground(id: number): Promise<boolean> {
     const result = await db.delete(mapBackgrounds).where(eq(mapBackgrounds.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async getPermitsForMap(): Promise<Permit[]> {
@@ -1551,7 +1551,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // Get total count
       const totalResult = await db
-        .select({ count: db.sql`COUNT(*)`.as('count') })
+        .select({ count: sql`COUNT(*)`.as('count') })
         .from(auditLogs);
       const totalLogs = Number(totalResult[0]?.count || 0);
 
@@ -1559,21 +1559,21 @@ export class DatabaseStorage implements IStorage {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayResult = await db
-        .select({ count: db.sql`COUNT(*)`.as('count') })
+        .select({ count: sql`COUNT(*)`.as('count') })
         .from(auditLogs)
-        .where(db.gte(auditLogs.createdAt, today));
+        .where(gte(auditLogs.createdAt, today));
       const todayLogs = Number(todayResult[0]?.count || 0);
 
       // Get recent action types
       const recentActionsResult = await db
         .select({
           actionType: auditLogs.actionType,
-          count: db.sql`COUNT(*)`.as('count')
+          count: sql`COUNT(*)`.as('count')
         })
         .from(auditLogs)
-        .where(db.gte(auditLogs.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))) // Last 7 days
+        .where(gte(auditLogs.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))) // Last 7 days
         .groupBy(auditLogs.actionType)
-        .orderBy(desc(db.sql`COUNT(*)`))
+        .orderBy(desc(sql`COUNT(*)`))
         .limit(5);
 
       const recentActions = recentActionsResult.map(row => ({

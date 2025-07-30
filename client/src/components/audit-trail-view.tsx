@@ -62,7 +62,7 @@ const ACTION_TYPE_COLORS: Record<string, string> = {
 
 export function AuditTrailView({ permitId, userId, className }: AuditTrailViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionTypeFilter, setActionTypeFilter] = useState<string>('');
+  const [actionTypeFilter, setActionTypeFilter] = useState<string>('all');
   const [userFilter, setUserFilter] = useState<string>('');
   const [limit, setLimit] = useState(50);
   const [offset, setOffset] = useState(0);
@@ -74,7 +74,7 @@ export function AuditTrailView({ permitId, userId, className }: AuditTrailViewPr
       const params = new URLSearchParams();
       if (permitId) params.append('permitId', permitId.toString());
       if (userId) params.append('userId', userId.toString());
-      if (actionTypeFilter) params.append('actionType', actionTypeFilter);
+      if (actionTypeFilter && actionTypeFilter !== 'all') params.append('actionType', actionTypeFilter);
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 
@@ -195,7 +195,7 @@ export function AuditTrailView({ permitId, userId, className }: AuditTrailViewPr
                 <SelectValue placeholder="Aktionstyp" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Aktionen</SelectItem>
+                <SelectItem value="all">Alle Aktionen</SelectItem>
                 <SelectItem value="create">Erstellt</SelectItem>
                 <SelectItem value="update">Aktualisiert</SelectItem>
                 <SelectItem value="delete">Gelöscht</SelectItem>
@@ -222,7 +222,7 @@ export function AuditTrailView({ permitId, userId, className }: AuditTrailViewPr
                 variant="outline"
                 onClick={() => {
                   setSearchTerm('');
-                  setActionTypeFilter('');
+                  setActionTypeFilter('all');
                   setUserFilter('');
                   setOffset(0);
                 }}
