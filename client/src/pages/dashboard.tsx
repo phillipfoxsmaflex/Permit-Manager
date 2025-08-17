@@ -281,7 +281,7 @@ export default function Dashboard() {
               Genehmigungsverwaltung Dashboard
             </h2>
             <p className="text-secondary-gray text-sm sm:text-base">
-              Überwachung und Verwaltung von Permit to work für enge Räume und chemische Umgebungen
+              Überwachung und Verwaltung
             </p>
           </div>
           
