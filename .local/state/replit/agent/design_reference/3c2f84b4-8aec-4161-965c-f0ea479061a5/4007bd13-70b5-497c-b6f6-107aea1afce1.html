@@ -1,0 +1,611 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Permit Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+                },
+                colors: {
+                    'safety-blue': '#1565C0',
+                    'warning-orange': '#FFA726',
+                    'safety-green': '#2E7D32',
+                    'alert-red': '#C62828',
+                    'caution-orange': '#F57C00',
+                    'industrial-gray': '#37474F',
+                    'secondary-gray': '#546E7A',
+                    'light-gray': '#90A4AE'
+                }
+            }
+        }
+    };
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- @COMPONENT: NavigationHeader -->
+<header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-hard-hat text-safety-blue text-2xl"></i>
+                    <h1 class="text-xl font-bold text-industrial-gray">SafeWork Permits</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#dashboard" class="text-safety-blue font-medium border-b-2 border-safety-blue pb-2">Dashboard</a>
+                    <a href="#permits" class="text-secondary-gray hover:text-industrial-gray">Permits</a>
+                    <a href="#reports" class="text-secondary-gray hover:text-industrial-gray">Reports</a>
+                    <a href="#settings" class="text-secondary-gray hover:text-industrial-gray">Settings</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 text-secondary-gray hover:text-industrial-gray">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-alert-red text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </button>
+                <div class="flex items-center space-x-2 cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=32&h=32" alt="User avatar" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-industrial-gray" data-bind="user.name">Hans Mueller</span>
+                    <i class="fas fa-chevron-down text-xs text-secondary-gray"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- @END_COMPONENT: NavigationHeader -->
+
+<!-- @COMPONENT: MainDashboard -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Dashboard Header -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-industrial-gray mb-2">Permit Management Dashboard</h2>
+        <p class="text-secondary-gray">Monitor and manage work permits for confined spaces and chemical environments</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-secondary-gray">Active Permits</p>
+                    <p class="text-3xl font-bold text-safety-blue" data-bind="stats.activePermits">24</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <i class="fas fa-file-alt text-safety-blue text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-secondary-gray">Pending Approval</p>
+                    <p class="text-3xl font-bold text-warning-orange" data-bind="stats.pendingApproval">7</p>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <i class="fas fa-clock text-warning-orange text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-secondary-gray">Expired Today</p>
+                    <p class="text-3xl font-bold text-alert-red" data-bind="stats.expiredToday">3</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-lg">
+                    <i class="fas fa-exclamation-triangle text-alert-red text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-secondary-gray">Completed</p>
+                    <p class="text-3xl font-bold text-safety-green" data-bind="stats.completed">156</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <i class="fas fa-check-circle text-safety-green text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+        <button class="bg-safety-blue text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors" data-event="click:openCreatePermitModal">
+            <i class="fas fa-plus"></i>
+            <span>Create New Permit</span>
+        </button>
+        <button class="bg-white border border-gray-300 text-industrial-gray px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-search"></i>
+            <span>Search Permits</span>
+        </button>
+        <button class="bg-white border border-gray-300 text-industrial-gray px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:bg-gray-50 transition-colors">
+            <i class="fas fa-download"></i>
+            <span>Export Report</span>
+        </button>
+    </div>
+
+    <!-- Recent Permits Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-industrial-gray">Recent Permits</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Permit ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Requestor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Valid Until</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-secondary-gray uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" data-mock="true">
+                    <!-- @MAP: permits.map(permit => ( -->
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-safety-blue">#CS-2024-001</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Confined Space</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Tank A-104</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">M. Schmidt</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-safety-green">Active</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Dec 15, 17:30</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-safety-blue hover:text-blue-700"><i class="fas fa-eye"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-edit"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-print"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-safety-blue">#CS-2024-002</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Hot Work</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Reactor B-202</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">T. Weber</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-warning-orange">Pending</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Dec 16, 09:00</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-safety-blue hover:text-blue-700"><i class="fas fa-eye"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-edit"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-print"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-safety-blue">#CS-2024-003</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Confined Space</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Vessel C-301</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">K. Fischer</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-alert-red">Expired</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-industrial-gray">Dec 14, 16:00</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-safety-blue hover:text-blue-700"><i class="fas fa-eye"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-edit"></i></button>
+                                <button class="text-secondary-gray hover:text-industrial-gray"><i class="fas fa-print"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- @END_MAP )) -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<!-- @END_COMPONENT: MainDashboard -->
+
+<!-- @COMPONENT: CreatePermitModal -->
+<div id="createPermitModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-industrial-gray">Create New Work Permit</h3>
+                <button class="text-secondary-gray hover:text-industrial-gray" data-event="click:closeCreatePermitModal">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Form Tabs -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="-mb-px flex space-x-8">
+                        <button class="tab-button active border-b-2 border-safety-blue text-safety-blue py-2 px-1 text-sm font-medium" data-tab="basic">
+                            1. Basic Information
+                        </button>
+                        <button class="tab-button border-b-2 border-transparent text-secondary-gray hover:text-industrial-gray py-2 px-1 text-sm font-medium" data-tab="safety">
+                            2. Safety Assessment
+                        </button>
+                        <button class="tab-button border-b-2 border-transparent text-secondary-gray hover:text-industrial-gray py-2 px-1 text-sm font-medium" data-tab="approval">
+                            3. Approval & Sign-off
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Basic Information Tab -->
+                <div id="basic-tab" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Permit Type</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.permitType">
+                                <option>Select permit type...</option>
+                                <option>Confined Space Entry</option>
+                                <option>Hot Work</option>
+                                <option>Electrical Work</option>
+                                <option>Chemical Handling</option>
+                                <option>Height Work</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Work Location</label>
+                            <input type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="e.g., Tank A-104, Building 3" data-bind="form.location">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Requested Start Date</label>
+                            <input type="datetime-local" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.startDate">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Requested End Date</label>
+                            <input type="datetime-local" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.endDate">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Work Description</label>
+                            <textarea rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="Describe the work to be performed..." data-bind="form.description"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Requestor Name</label>
+                            <input type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.requestorName">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Department</label>
+                            <input type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.department">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Contact Number</label>
+                            <input type="tel" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.contactNumber">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Emergency Contact</label>
+                            <input type="tel" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="form.emergencyContact">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Assessment Tab -->
+                <div id="safety-tab" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-exclamation-triangle text-caution-orange text-lg mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-semibold text-industrial-gray">Safety Requirements</h4>
+                                    <p class="text-sm text-secondary-gray mt-1">Complete all applicable safety checks before proceeding with work authorization.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pre-Work Safety Checklist -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-industrial-gray mb-4">Pre-Work Safety Checklist</h4>
+                            <div class="space-y-3">
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.atmosphereTest">
+                                    <span class="text-sm text-industrial-gray">Atmosphere testing completed and documented</span>
+                                </label>
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.ventilation">
+                                    <span class="text-sm text-industrial-gray">Adequate ventilation system verified</span>
+                                </label>
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.ppe">
+                                    <span class="text-sm text-industrial-gray">Personal protective equipment (PPE) requirements identified</span>
+                                </label>
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.emergencyProcedures">
+                                    <span class="text-sm text-industrial-gray">Emergency procedures communicated to all workers</span>
+                                </label>
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.fireWatch">
+                                    <span class="text-sm text-industrial-gray">Fire watch personnel assigned (if applicable)</span>
+                                </label>
+                                <label class="flex items-start space-x-3">
+                                    <input type="checkbox" class="mt-1 h-4 w-4 text-safety-blue focus:ring-safety-blue border-gray-300 rounded" data-bind="safety.isolationLockout">
+                                    <span class="text-sm text-industrial-gray">Equipment isolation and lockout/tagout completed</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Risk Assessment -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-industrial-gray mb-4">Risk Assessment</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-industrial-gray mb-2">Risk Level</label>
+                                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" data-bind="risk.level">
+                                        <option>Select risk level...</option>
+                                        <option>Low</option>
+                                        <option>Medium</option>
+                                        <option>High</option>
+                                        <option>Critical</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-industrial-gray mb-2">Safety Officer</label>
+                                    <input type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="Assigned safety officer" data-bind="risk.safetyOfficer">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-industrial-gray mb-2">Identified Hazards</label>
+                                <textarea rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="List all identified hazards and mitigation measures..." data-bind="risk.hazards"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Gas Monitoring (for confined spaces) -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-industrial-gray mb-4">Atmospheric Monitoring</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-industrial-gray mb-2">Oxygen Level (%)</label>
+                                    <input type="number" step="0.1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="19.5-23.5" data-bind="monitoring.oxygen">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-industrial-gray mb-2">LEL (%)</label>
+                                    <input type="number" step="0.1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="<10%" data-bind="monitoring.lel">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-industrial-gray mb-2">H2S (ppm)</label>
+                                    <input type="number" step="0.1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="<10 ppm" data-bind="monitoring.h2s">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approval Tab -->
+                <div id="approval-tab" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-info-circle text-safety-blue text-lg mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-semibold text-industrial-gray">Approval Process</h4>
+                                    <p class="text-sm text-secondary-gray mt-1">Digital signatures required from authorized personnel before work can commence.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approvals Required -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-industrial-gray mb-4">Required Approvals</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-user-tie text-secondary-gray"></i>
+                                        <div>
+                                            <p class="font-medium text-industrial-gray">Area Supervisor</p>
+                                            <p class="text-sm text-secondary-gray">Responsible for work area oversight</p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-warning-orange">Pending</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-hard-hat text-secondary-gray"></i>
+                                        <div>
+                                            <p class="font-medium text-industrial-gray">Safety Officer</p>
+                                            <p class="text-sm text-secondary-gray">Safety requirements verification</p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-warning-orange">Pending</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-cog text-secondary-gray"></i>
+                                        <div>
+                                            <p class="font-medium text-industrial-gray">Operations Manager</p>
+                                            <p class="text-sm text-secondary-gray">Final authorization for critical work</p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-warning-orange">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <label class="block text-sm font-medium text-industrial-gray mb-2">Additional Comments</label>
+                            <textarea rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-safety-blue focus:border-transparent" placeholder="Any additional safety considerations or special instructions..." data-bind="approval.comments"></textarea>
+                        </div>
+
+                        <!-- Emergency Contacts -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-industrial-gray mb-4">Emergency Contacts</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-3 bg-red-50 rounded-lg">
+                                    <p class="font-medium text-alert-red">Emergency Services</p>
+                                    <p class="text-lg font-bold text-alert-red">112</p>
+                                </div>
+                                <div class="p-3 bg-orange-50 rounded-lg">
+                                    <p class="font-medium text-caution-orange">Plant Emergency</p>
+                                    <p class="text-lg font-bold text-caution-orange">+49 123 456-7890</p>
+                                </div>
+                                <div class="p-3 bg-blue-50 rounded-lg">
+                                    <p class="font-medium text-safety-blue">Safety Department</p>
+                                    <p class="text-lg font-bold text-safety-blue">+49 123 456-7891</p>
+                                </div>
+                                <div class="p-3 bg-green-50 rounded-lg">
+                                    <p class="font-medium text-safety-green">Medical</p>
+                                    <p class="text-lg font-bold text-safety-green">+49 123 456-7892</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                    <button class="px-4 py-2 text-sm font-medium text-secondary-gray hover:text-industrial-gray" data-event="click:closeCreatePermitModal">
+                        Cancel
+                    </button>
+                    <div class="flex space-x-3">
+                        <button class="px-6 py-2 text-sm font-medium text-industrial-gray bg-gray-100 rounded-lg hover:bg-gray-200" data-event="click:saveDraft">
+                            Save Draft
+                        </button>
+                        <button class="px-6 py-2 text-sm font-medium text-white bg-safety-blue rounded-lg hover:bg-blue-700" data-event="click:submitPermit">
+                            Submit for Approval
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- @END_COMPONENT: CreatePermitModal -->
+
+<!-- Mobile Menu Button (visible on mobile) -->
+<button class="fixed bottom-6 right-6 bg-safety-blue text-white p-4 rounded-full shadow-lg md:hidden z-40">
+    <i class="fas fa-plus text-xl"></i>
+</button>
+
+<script>
+(function() {
+    'use strict';
+    
+    // Modal functionality
+    const createPermitBtn = document.querySelector('[data-event="click:openCreatePermitModal"]');
+    const modal = document.getElementById('createPermitModal');
+    const closeModalBtns = document.querySelectorAll('[data-event="click:closeCreatePermitModal"]');
+    
+    if (createPermitBtn && modal) {
+        createPermitBtn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+        });
+    }
+    
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            modal.classList.add('hidden');
+        });
+    });
+    
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            
+            // Remove active class from all tabs
+            tabButtons.forEach(btn => {
+                btn.classList.remove('border-safety-blue', 'text-safety-blue');
+                btn.classList.add('border-transparent', 'text-secondary-gray');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.remove('border-transparent', 'text-secondary-gray');
+            this.classList.add('border-safety-blue', 'text-safety-blue');
+            
+            // Hide all tab contents
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show target tab content
+            const targetContent = document.getElementById(targetTab + '-tab');
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+            }
+        });
+    });
+    
+    // Form validation and submission
+    const submitBtn = document.querySelector('[data-event="click:submitPermit"]');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            // Basic form validation
+            const requiredFields = ['permitType', 'location', 'startDate', 'endDate', 'requestorName'];
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                const element = document.querySelector(`[data-bind="form.${field}"]`);
+                if (element && !element.value.trim()) {
+                    element.classList.add('border-red-500');
+                    isValid = false;
+                } else if (element) {
+                    element.classList.remove('border-red-500');
+                }
+            });
+            
+            if (isValid) {
+                alert('Permit submitted for approval successfully!');
+                modal.classList.add('hidden');
+                // In real app, this would submit to backend
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        });
+    }
+    
+    // Save draft functionality
+    const saveDraftBtn = document.querySelector('[data-event="click:saveDraft"]');
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener('click', function() {
+            alert('Draft saved successfully!');
+            // In real app, this would save to backend
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Mobile menu button functionality
+    const mobileMenuBtn = document.querySelector('.fixed.bottom-6.right-6');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+        });
+    }
+})();
+</script>
+
+</body>
+</html>
